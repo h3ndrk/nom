@@ -31,16 +31,41 @@ fn test_escaped_transform() {
     esc_trans("abcd"),
     Err(Err::Error(("abcd", ErrorKind::EscapedTransform)))
   );
+
+  // Initial test case ported from my application:
+  // =============================================
+  // assert_eq!(
+  //   delimited::<_, _, _, _, Error<&str>, _, _, _>(
+  //     tag("\""),
+  //     escaped_transform(
+  //       take_while(|character: char| character.is_alphanumeric()),
+  //       '\\',
+  //       alt((value("\\", tag("\\")), value("\"", tag("\""))))
+  //     ),
+  //     tag("\"")
+  //   )("\"foo\""),
+  //   Ok(("", "foo".to_string()))
+  // );
+
+  // Simplified test case from above (removed delimited):
+  // ====================================================
+  // assert_eq!(
+  //   escaped_transform::<_, Error<&str>, _, _, _, _, _, _>(
+  //     take_while(|character: char| character.is_alphanumeric()),
+  //     '\\',
+  //     alt((value("\\", tag("\\")), value("\"", tag("\""))))
+  //   )("foo\""),
+  //   Ok(("", "foo".to_string()))
+  // );
+
+  // Even more simplified test case that now contains simple parsers:
+  // ================================================================
   assert_eq!(
-    delimited::<_, _, _, _, Error<&str>, _, _, _>(
-      tag("\""),
-      escaped_transform(
-        take_while(|character: char| character.is_alphanumeric()),
-        '\\',
-        alt((value("\\", tag("\\")), value("\"", tag("\""))))
-      ),
-      tag("\"")
-    )("\"foo\""),
+    escaped_transform::<_, Error<&str>, _, _, _, _, _, _>(
+      take_while(|character: char| character.is_alphanumeric()),
+      '\\',
+      tag("\\")
+    )("foo\""),
     Ok(("", "foo".to_string()))
   );
 }
